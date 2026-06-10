@@ -7,14 +7,21 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTORCC ON)
 
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core)
-find_package(Dtk${DTK_VERSION_MAJOR}Log REQUIRED)
+find_package(Dtk${DTK_NAME_SUFFIX}Log REQUIRED)
+find_package(DBus1 REQUIRED)
 if(LINUX)
   find_package(PkgConfig REQUIRED)
   find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS DBus)
-  if("${QT_VERSION_MAJOR}" STREQUAL "5")
-      pkg_check_modules(QGSettings REQUIRED IMPORTED_TARGET gsettings-qt) #Dtk6 removed.
-  endif()
 
+  if(${QT_VERSION_MAJOR} EQUAL 5)
+      pkg_check_modules(QGSettings REQUIRED IMPORTED_TARGET gsettings-qt) #Dtk6 removed.
+  elseif(${QT_VERSION_MAJOR} EQUAL 6)
+      if(${Qt6Core_VERSION} VERSION_GREATER_EQUAL 6.10.0)
+          find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS CorePrivate)
+      endif()
+  else()
+      message(FATAL_ERROR "Unsupported Qt version: ${QT_VERSION_MAJOR}")
+  endif()
 endif()
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Xml)
 find_package(DtkBuildHelper REQUIRED)
@@ -23,6 +30,12 @@ find_package(DtkBuildHelper REQUIRED)
 find_package(ICU REQUIRED COMPONENTS uc)
 pkg_check_modules(uchardet REQUIRED uchardet)
 # end text encoding
+
+# 为不包含实际QObject类的头文件跳过AutoMOC处理
+set_property(SOURCE ../include/base/dsingleton.h PROPERTY SKIP_AUTOMOC ON)
+if("${DTK_VERSION_MAJOR}" STREQUAL "6")
+    set_property(SOURCE ../include/util/dthreadutils.h PROPERTY SKIP_AUTOMOC ON)
+endif()
 
 # start base
 include(base/base.cmake)
@@ -64,7 +77,7 @@ if(LINUX)
     Qt${QT_VERSION_MAJOR}::Core
     Qt${QT_VERSION_MAJOR}::DBus
     Qt${QT_VERSION_MAJOR}::Xml
-    Dtk${DTK_VERSION_MAJOR}::Log
+    Dtk${DTK_NAME_SUFFIX}::Log
   )
   target_link_libraries(${LIB_NAME} PRIVATE
     Qt${QT_VERSION_MAJOR}::CorePrivate
@@ -100,8 +113,8 @@ else()
   endif()
 endif()
 set_target_properties(${LIB_NAME} PROPERTIES
-  VERSION ${CMAKE_PROJECT_VERSION}
-  SOVERSION ${CMAKE_PROJECT_VERSION_MAJOR}
+  VERSION ${DTK_VERSION}
+  SOVERSION ${DTK_VERSION_MAJOR}
   EXPORT_NAME Core
 )
 
@@ -114,6 +127,9 @@ target_compile_definitions(${LIB_NAME} PRIVATE
     LIBDTKCORE_LIBRARY
 )
 
+target_link_libraries(${LIB_NAME} PRIVATE
+  dbus-1
+)
 target_include_directories(${LIB_NAME} PRIVATE
   ${uchardet_INCLUDE_DIRS}
 )
@@ -128,6 +144,7 @@ target_include_directories(${LIB_NAME} PUBLIC
   $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include/settings>
   $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include/filesystem>
   $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
+  $<BUILD_INTERFACE:${PROJECT_BINARY_DIR}>
 )
 
 target_include_directories(${LIB_NAME} INTERFACE
@@ -174,6 +191,6 @@ install(TARGETS ${LIB_NAME} EXPORT ${DtkCore}Targets
 
 install(EXPORT ${DtkCore}Targets
   FILE ${DtkCore}Targets.cmake
-  NAMESPACE Dtk${DTK_VERSION_MAJOR}::
+  NAMESPACE Dtk${DTK_NAME_SUFFIX}::
   DESTINATION ${CONFIG_CMAKE_INSTALL_DIR}
 )

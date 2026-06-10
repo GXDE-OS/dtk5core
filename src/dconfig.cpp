@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2021 - 2022 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2021 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
@@ -80,6 +80,13 @@ static QString NoAppId;
     @fn void DConfigBackend::reset(const QString &key)
 
     @sa DConfig::reset()
+ */
+
+ /*!
+ @~english
+     @fn bool DConfigBackend::isReadOnly(const QString &key) const = 0
+
+     @sa DConfig::isReadOnly()
  */
 
 /*!
@@ -173,13 +180,13 @@ public:
         if (owner->appId == NoAppId)
             return true;
 
-        QScopedPointer<DConfigFile> file(new DConfigFile(NoAppId, owner->name, owner->subpath));
+        std::unique_ptr<DConfigFile> file(new DConfigFile(NoAppId, owner->name, owner->subpath));
         const bool canFallbackToGeneric = !file->meta()->metaPath(prefix).isEmpty();
         if (canFallbackToGeneric) {
-            QScopedPointer<DConfigCache> cache(file->createUserCache(getuid()));
+            std::unique_ptr<DConfigCache> cache(file->createUserCache(getuid()));
             if (file->load(prefix) && cache->load(prefix)) {
-                genericConfigFile.reset(file.take());
-                genericConfigCache.reset(cache.take());
+                genericConfigFile.reset(file.release());
+                genericConfigCache.reset(cache.release());
             }
         }
         return true;
@@ -228,6 +235,12 @@ public:
     virtual void reset(const QString &key) override
     {
         setValue(key, QVariant());
+    }
+
+    virtual bool isReadOnly(const QString &key) const override
+    {
+        const auto vc = configFile->meta()->permissions(key);
+        return vc == DConfigFile::ReadOnly;
     }
 
     virtual QString name() const override
@@ -283,7 +296,8 @@ class Q_DECL_HIDDEN DBusBackend : public DConfigBackend
 {
 public:
     explicit DBusBackend(DConfigPrivate* o):
-        owner(o)
+        owner(o),
+        config(nullptr)
     {
     }
 
@@ -326,19 +340,21 @@ public:
         DSGConfig dsg_config(DSG_CONFIG, "/", QDBusConnection::systemBus());
         QDBusPendingReply<QDBusObjectPath> dbus_reply = dsg_config.acquireManager(owner->appId, owner->name, owner->subpath);
         const QDBusObjectPath dbus_path = dbus_reply.value();
-        if (dbus_reply.isError() || dbus_path.path().isEmpty()) {
+        const auto path = dbus_path.path(); // 显式拷贝，避免其它线程共用systemBus连接而修改dbus数据
+        if (dbus_reply.isError() || path.isEmpty()) {
             qCWarning(cfLog, "Can't acquire config manager. error:\"%s\"", qPrintable(dbus_reply.error().message()));
             return false;
         } else {
-            qCDebug(cfLog(), "dbus path=\"%s\"", qPrintable(dbus_path.path()));
-            config.reset(new DSGConfigManager(DSG_CONFIG_MANAGER, dbus_path.path(),
-                                                QDBusConnection::systemBus(), owner->q_func()));
+            qCDebug(cfLog, "dbus path=\"%s\"", qPrintable(path));
+            config = new DSGConfigManager(DSG_CONFIG_MANAGER, path,
+                                           QDBusConnection::systemBus(), owner->q_func());
             if (!config->isValid()) {
-                qCWarning(cfLog(), "Can't acquire config path=\"%s\"", qPrintable(dbus_path.path()));
-                config.reset();
+                qCWarning(cfLog, "Can't acquire config path=\"%s\"", qPrintable(path));
+                config->deleteLater();
+                config = nullptr;
                 return false;
             } else {
-                QObject::connect(config.data(), &DSGConfigManager::valueChanged, owner->q_func(), &DConfig::valueChanged);
+                QObject::connect(config, &DSGConfigManager::valueChanged, owner->q_func(), &DConfig::valueChanged);
             }
         }
         return true;
@@ -370,7 +386,7 @@ public:
                 complexType >> list;
                 QVariantList res;
                 res.reserve(list.size());
-                for (const auto &item : qAsConst(list)) {
+                for (const auto &item : std::as_const(list)) {
                     res << decodeQDBusArgument(item);
                 }
                 return res;
@@ -424,13 +440,25 @@ public:
                              << ", error message:" << reply.error();
     }
 
+    virtual bool isReadOnly(const QString &key) const override
+    {
+        auto reply = config->permissions(key);
+        reply.waitForFinished();
+        if (reply.isError()) {
+            qWarning() << "Failed to call `permissions`, key:" << key
+                       << ", error message:" << reply.error().message();
+            return false;
+        }
+        return reply.value() == QLatin1String("readonly");
+    }
+
     virtual QString name() const override
     {
         return QString("DBusBackend");
     }
 
 private:
-    QScopedPointer<DSGConfigManager> config;
+    DSGConfigManager *config;
     DConfigPrivate* owner;
 };
 
@@ -530,10 +558,6 @@ DConfigBackend *DConfigPrivate::getOrCreateBackend()
     if (DBusBackend::isServiceRegistered() || DBusBackend::isServiceActivatable()) {
         qCDebug(cfLog, "Fallback to DBus mode");
         backend.reset(new DBusBackend(this));
-    }
-    if (!backend) {
-        qCDebug(cfLog, "Can't use DBus config service, fallback to DConfigFile mode");
-        backend.reset(new FileBackend(this));
     }
 #else
     backend.reset(new FileBackend(this));
@@ -818,6 +842,21 @@ void DConfig::reset(const QString &key)
         return;
 
     d->backend->reset(key);
+}
+
+/*!
+ * @~english
+ * @brief Check whether the configuration item is read-only
+ * @param key Configuration Item Name
+ * @return Return `true` if the configuration item is read-only, otherwise return `false`
+ */
+bool DConfig::isReadOnly(const QString &key) const
+{
+    D_DC(DConfig);
+    if (d->invalid())
+        return false;
+
+    return d->backend->isReadOnly(key);
 }
 
 /*!

@@ -1,3 +1,441 @@
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [6.7.43] - 2026-06-04
+
+### Added
+
+- Add version guard for entryList method
+- Add thread safety for pinyin dictionary initialization
+- Support full Unicode with UTF-8 byte escaping
+
+### Changed
+
+- Chore: New release 6.7.33
+- Chore: New release 6.7.34
+- Chore: New release 6.7.35
+- Chore: New release 6.7.36
+- Chore: New release 6.7.37
+- Chore: New release 6.7.38
+- Update license info loading and search paths
+- Chore: New release 6.7.39
+- Chore: New release 6.7.40
+- Move inline function to library codebase
+- Chore: New release 6.7.41
+- Chore: New release 6.7.42
+- Replace private access hacks with accessor pattern
+
+### Fixed
+
+- Validate subpath format in dconfig
+- 修复 DSysInfo 在 AArch64 架构下的线程安全问题
+- Restore dconfig_meta_files macro for DTK5 compatibility
+- Avoid duplicate logging under systemd with journal
+- Replace QScopedPointer with raw pointer for DSGConfigManager
+- Memory leak when overwriting cached DBus property values
+
+### Removed
+
+- Remove fallback to file mode in DConfig
+
+## [6.7.42] - 2026-05-20
+
+### Added
+
+- Add version guard for entryList method
+- Add thread safety for pinyin dictionary initialization
+- Support full Unicode with UTF-8 byte escaping
+
+### Changed
+
+- Chore: New release 6.7.33
+- Chore: New release 6.7.34
+- Chore: New release 6.7.35
+- Chore: New release 6.7.36
+- Chore: New release 6.7.37
+- Chore: New release 6.7.38
+- Update license info loading and search paths
+- Chore: New release 6.7.39
+- Chore: New release 6.7.40
+- Move inline function to library codebase
+- Chore: New release 6.7.41
+
+### Fixed
+
+- Validate subpath format in dconfig
+- 修复 DSysInfo 在 AArch64 架构下的线程安全问题
+- Restore dconfig_meta_files macro for DTK5 compatibility
+- Avoid duplicate logging under systemd with journal
+- Replace QScopedPointer with raw pointer for DSGConfigManager
+- Memory leak when overwriting cached DBus property values
+
+### Removed
+
+- Remove fallback to file mode in DConfig
+
+## [6.7.41] - 2026-05-08
+
+### Added
+
+- Add version guard for entryList method
+- Add thread safety for pinyin dictionary initialization
+- Support full Unicode with UTF-8 byte escaping
+
+### Changed
+
+- Chore: New release 6.7.33
+- Chore: New release 6.7.34
+- Chore: New release 6.7.35
+- Chore: New release 6.7.36
+- Chore: New release 6.7.37
+- Chore: New release 6.7.38
+- Update license info loading and search paths
+- Chore: New release 6.7.39
+- Chore: New release 6.7.40
+- Move inline function to library codebase
+
+### Fixed
+
+- Validate subpath format in dconfig
+- 修复 DSysInfo 在 AArch64 架构下的线程安全问题
+- Restore dconfig_meta_files macro for DTK5 compatibility
+- Avoid duplicate logging under systemd with journal
+- Replace QScopedPointer with raw pointer for DSGConfigManager
+
+### Removed
+
+- Remove fallback to file mode in DConfig
+
+## [6.7.40] - 2026-04-23
+
+### Added
+
+- Add version guard for entryList method
+- Add thread safety for pinyin dictionary initialization
+
+### Changed
+
+- Chore: New release 6.7.33
+- Chore: New release 6.7.34
+- Chore: New release 6.7.35
+- Chore: New release 6.7.36
+- Chore: New release 6.7.37
+- Chore: New release 6.7.38
+- Update license info loading and search paths
+- Chore: New release 6.7.39
+
+### Fixed
+
+- Validate subpath format in dconfig
+- 修复 DSysInfo 在 AArch64 架构下的线程安全问题
+- Restore dconfig_meta_files macro for DTK5 compatibility
+- Avoid duplicate logging under systemd with journal
+- Replace QScopedPointer with raw pointer for DSGConfigManager
+
+### Removed
+
+- Remove fallback to file mode in DConfig
+
+## [6.7.39] - 2026-04-09
+
+### Added
+
+- Add version guard for entryList method
+
+### Changed
+
+- Chore: New release 6.7.33
+- Chore: New release 6.7.34
+- Chore: New release 6.7.35
+- Chore: New release 6.7.36
+- Chore: New release 6.7.37
+- Chore: New release 6.7.38
+- Update license info loading and search paths
+
+### Fixed
+
+- Validate subpath format in dconfig
+- 修复 DSysInfo 在 AArch64 架构下的线程安全问题
+- Restore dconfig_meta_files macro for DTK5 compatibility
+- Avoid duplicate logging under systemd with journal
+- Replace QScopedPointer with raw pointer for DSGConfigManager
+
+### Removed
+
+- Remove fallback to file mode in DConfig
+
+## [6.7.38] - 2026-03-31
+
+### Added
+
+- Add version guard for entryList method
+
+### Changed
+
+- Chore: New release 6.7.33
+- Chore: New release 6.7.34
+- Chore: New release 6.7.35
+- Chore: New release 6.7.36
+- Chore: New release 6.7.37
+
+### Fixed
+
+- Validate subpath format in dconfig
+- 修复 DSysInfo 在 AArch64 架构下的线程安全问题
+- Restore dconfig_meta_files macro for DTK5 compatibility
+- Avoid duplicate logging under systemd with journal
+- Replace QScopedPointer with raw pointer for DSGConfigManager
+
+### Removed
+
+- Remove fallback to file mode in DConfig
+
+## [6.7.37] - 2026-03-25
+
+### Added
+
+- Add version guard for entryList method
+
+### Changed
+
+- Chore: New release 6.7.33
+- Chore: New release 6.7.34
+- Chore: New release 6.7.35
+- Chore: New release 6.7.36
+
+### Fixed
+
+- Validate subpath format in dconfig
+- 修复 DSysInfo 在 AArch64 架构下的线程安全问题
+- Restore dconfig_meta_files macro for DTK5 compatibility
+- Avoid duplicate logging under systemd with journal
+- Replace QScopedPointer with raw pointer for DSGConfigManager
+
+### Removed
+
+- Remove fallback to file mode in DConfig
+
+## [6.7.36] - 2026-03-12
+
+### Changed
+
+- Chore: New release 6.7.33
+- Chore: New release 6.7.34
+- Chore: New release 6.7.35
+
+### Fixed
+
+- Validate subpath format in dconfig
+- 修复 DSysInfo 在 AArch64 架构下的线程安全问题
+- Restore dconfig_meta_files macro for DTK5 compatibility
+- Avoid duplicate logging under systemd with journal
+
+### Removed
+
+- Remove fallback to file mode in DConfig
+
+## [6.7.35] - 2026-03-05
+
+### Changed
+
+- Chore: New release 6.7.33
+- Chore: New release 6.7.34
+
+### Fixed
+
+- Validate subpath format in dconfig
+- 修复 DSysInfo 在 AArch64 架构下的线程安全问题
+- Restore dconfig_meta_files macro for DTK5 compatibility
+- Avoid duplicate logging under systemd with journal
+
+### Removed
+
+- Remove fallback to file mode in DConfig
+
+## [6.7.34] - 2026-02-27
+
+### Changed
+
+- Chore: New release 6.7.33
+
+### Fixed
+
+- Validate subpath format in dconfig
+- 修复 DSysInfo 在 AArch64 架构下的线程安全问题
+- Restore dconfig_meta_files macro for DTK5 compatibility
+- Avoid duplicate logging under systemd with journal
+
+## [6.7.33] - 2026-02-05
+
+### Fixed
+
+- Validate subpath format in dconfig
+- 修复 DSysInfo 在 AArch64 架构下的线程安全问题
+- Restore dconfig_meta_files macro for DTK5 compatibility
+
+## [6.7.32] - 2026-01-22
+
+### Added
+
+- Add unit tests for dconfig2cpp generated class
+- Add version macros and property definitions to dconfig2cpp
+
+### Changed
+
+- Replace with the new interface dconfig isInitializeSucceeded
+
+### Fixed
+
+- Correct condition check for fallback config in LogManager
+- Refactor DConfig wrapper class generation for thread safety and lifecycle management
+- Fix: dconfig2cpp: ensure isInitializeSucceeded() is true only after all
+
+### Removed
+
+- Delete workflow call-synchronize-to-dtk6
+- Remove dtk5/6 version differentiation in build rules
+
+## [6.7.31] - 2026-01-06
+
+### Added
+
+- Add DTK6 documentation package and improve build profiles
+
+### Changed
+
+- Unify DTK5 and DTK6
+
+### Fixed
+
+- Correct pinyin tone number placement and test issues
+- Fix build with Qt 6.9
+
+## [5.7.30] - 2025-12-11
+
+### Added
+
+- Add isReadOnly method to DConfig
+
+### Changed
+
+- Generate dtkcore_config.h out of source tree
+
+### Fixed
+
+- Fix DCI file engine compatibility issues in Qt6
+- Correct dtkcore_config.h installation path
+
+## [5.7.28] - 2025-12-04
+
+## [5.7.27] - 2025-11-27
+
+### Added
+
+- Add reproducible build configuration
+
+## [5.7.26] - 2025-11-06
+
+### Changed
+
+- Chore: New release 5.7.25
+- Improve numeric type detection in dconfig2cpp (#516)
+
+### Fixed
+
+- 修复某些机型CPU型号中包含冒号时控制中心无法读取显示CPU信息的问题
+
+## [5.7.25] - 2025-10-30
+
+## [5.7.24] - 2025-10-16
+
+### Added
+
+- Support Qt 6.10
+
+### Fixed
+
+- Replace rmdir with rename for directory operations
+- Prevent thread-safety issue in D-Bus config manager
+- Sync with qt5platform-plugins
+
+## [5.7.23] - 2025-09-25
+
+### Added
+
+- Add fallback type conversion in demarshall function
+
+### Changed
+
+- Feat: DPinyin::firstLetters support set ToneStyle
+- 增加服务器教育版和国防版
+
+### Fixed
+
+- Fix trash validation for symlinks
+- Fix heap-use-after-free issue
+- Fix dconfig static variable release issue
+
+## [5.7.22] - 2025-09-04
+
+### Fixed
+
+- Resolve non-reproducible DBUS code generation issue
+
+## [5.7.21] - 2025-08-14
+
+### Added
+
+- Add deprecation ignore support for DTK
+
+## [5.7.20] - 2025-07-31
+
+### Changed
+
+- Improve D-Bus resource management with RAII
+
+### Fixed
+
+- Use QCoreApplication for application name
+- Resolve compilation warnings and Qt6 compatibility issues
+
+## [5.7.19] - 2025-07-03
+
+### Added
+
+- Add security hardening flags to build configuration
+
+### Changed
+
+- Replace QtDBus with libdbus-1 in dsgapplication
+
+## [5.7.18] - 2025-06-27
+
+### Fixed
+
+- Improve logging rules environment variable handling
+- Copy cachePrefix in DConfigFile copy constructor
+- Make version parameter optional in release workflow
+
+## [5.7.17] - 2025-06-18
+
+### Added
+
+- Feat(ci): add auto release
+- Add license for VERSION.in
+
+### Changed
+
+- Support VERSION file
+- Update .syncexclude
+
+### Fixed
+
+- .deepin@main -> .deepin@master
+
 <a name="5.7.14"></a>
 ## 5.7.14 (2025-04-12)
 

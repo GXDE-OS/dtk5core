@@ -30,7 +30,7 @@ Copyright: None
 License: CC0-1.0
 
 # cmake
-Files: *.cmake *CMakeLists.txt *.pc.in
+Files: *.cmake *CMakeLists.txt *.pc.in, cmake/*.in misc/*.in VERSION VERSION.in
 Copyright: None
 License: CC0-1.0
 
@@ -69,11 +69,6 @@ Files: src/util/resources/dpinyin.dict tests/data/LGPLv3.txt
 Copyright: None
 License: CC0-1.0
 
-
-Files: src/log/*
-Copyright: UnionTech Software Technology Co., Ltd.
-License: LGPL-3.0-or-later
-
 #doxygentheme
 Files: docs/doxygentheme/*
 Copyright: Copyright (c) 2021 - 2022 jothepro
@@ -83,3 +78,12 @@ License: MIT
 Files: docs/references/*
 Copyright: UnionTech Software Technology Co., Ltd.
 License: CC-BY-4.0
+
+
+Files: toolGenerate/**/*
+Copyright: None
+License: CC0-1.0
+
+Files: src/log/dconfig_org_deepin_dtk_preference.hpp
+Copyright: None
+License: CC0-1.0

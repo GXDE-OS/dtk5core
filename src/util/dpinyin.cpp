@@ -1,25 +1,25 @@
-// SPDX-FileCopyrightText: 2019 - 2023 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2019 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
 #include "dpinyin.h"
 
+#include <QDebug>
 #include <QFile>
+#include <QMap>
 #include <QSet>
 #include <QTextStream>
-#include <QMap>
-#include <QDebug>
+
+#include <mutex>
 
 DCORE_BEGIN_NAMESPACE
 
 static QHash<uint, QString> dict = {};
+static std::once_flag dictInitFlag;
 const char kDictFile[] = ":/dpinyin/resources/dpinyin.dict";
 
-static void InitDict() {
-    if (!dict.isEmpty()) {
-        return;
-    }
-
+static void initDictImpl()
+{
     dict.reserve(25333);
 
     QFile file(kDictFile);
@@ -46,6 +46,11 @@ static void InitDict() {
     }
 }
 
+static void InitDict()
+{
+    std::call_once(dictInitFlag, initDictImpl);
+}
+
 static void initToneTable(QMap<QChar, QString> &toneTable)
 {
     if (toneTable.size() > 0)
@@ -70,23 +75,31 @@ static QString toned(const QString &str, ToneStyle ts)
     initToneTable(toneTable);
 
     QString newStr = str;
-    QString cv;
-    for (QChar c : str) {
-        if (!toneTable.contains(c))
-            continue;
+    QString toneNum = "";
 
-        cv = toneTable.value(c);
-        switch (ts) {
-        case TS_NoneTone:
-            newStr.replace(c, cv.left(1));
-            break;
-        case TS_ToneNum:
-            newStr.replace(c, cv);
-            break;
-        default:
-            break;
+    // First pass: find tone number and remove tone marks
+    for (QChar c : str) {
+        if (toneTable.contains(c)) {
+            QString cv = toneTable.value(c);
+            switch (ts) {
+            case TS_NoneTone:
+                newStr.replace(c, cv.left(1));
+                break;
+            case TS_ToneNum:
+                newStr.replace(c, cv.left(1)); // Remove tone mark first
+                toneNum = cv.right(1); // Extract tone number
+                break;
+            default:
+                break;
+            }
         }
     }
+
+    // For TS_ToneNum, append tone number at the end
+    if (ts == TS_ToneNum && !toneNum.isEmpty()) {
+        newStr += toneNum;
+    }
+
     return newStr;
 }
 
@@ -212,10 +225,22 @@ QStringList pinyin(const QString &words, ToneStyle ts, bool *ok)
  */
 QStringList firstLetters(const QString &words)
 {
+    return firstLetters(words, TS_Tone);
+}
+
+/*!
+  \fn QStringList Dtk::Core::firstLetters(const QString &words)
+  \brief Convert Chinese characters to Pinyin firstLetters list
+  \brief with controllable tone style.
+
+  \return pinyin first letters list of the words
+ */
+QStringList firstLetters(const QString &words, ToneStyle ts)
+{
     QList<QStringList> result;
     bool ok = false;
     for (const QChar &w : words) {
-        QStringList pys = pinyin(w, TS_Tone, &ok);
+        QStringList pys = pinyin(w, ts, &ok);
         if (!ok) {
             result << QStringList(w);
             continue;

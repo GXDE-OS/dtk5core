@@ -1,4 +1,4 @@
-// SPDX-FileCopyrightText: 2022 UnionTech Software Technology Co., Ltd.
+// SPDX-FileCopyrightText: 2022 - 2026 UnionTech Software Technology Co., Ltd.
 //
 // SPDX-License-Identifier: LGPL-3.0-or-later
 
@@ -9,6 +9,11 @@
 #include <ConsoleAppender.h>
 #include <RollingFileAppender.h>
 #include <JournalAppender.h>
+
+#ifdef Q_OS_LINUX
+#include <sys/stat.h>
+#include <unistd.h>
+#endif
 
 #include "dstandardpaths.h"
 #include "dconfig_org_deepin_dtk_preference.hpp"
@@ -45,6 +50,8 @@ public:
     void initLoggingRules();
     void updateLoggingRules();
 
+    bool shouldSkipConsoleAppender() const;
+
     QString m_format;
     QString m_logPath;
     ConsoleAppender* m_consoleAppender = nullptr;
@@ -72,7 +79,7 @@ dconfig_org_deepin_dtk_preference *DLogManagerPrivate::createDConfig(const QStri
 
 void DLogManagerPrivate::initLoggingRules()
 {
-    if (qEnvironmentVariableIsSet("DTK_DISABLED_LOGGING_RULES"))
+    if (qEnvironmentVariableIsSet("DTK_DISABLED_LOGGING_RULES") || qEnvironmentVariableIsSet("QT_LOGGING_RULES"))
         return;
 
     // 1. 未指定 fallbackId 时，以 dsgAppId 为准
@@ -110,17 +117,44 @@ void DLogManagerPrivate::updateLoggingRules()
 {
     QVariant var;
     // 4. 优先看 dsgConfig 是否默认值，其次 fallback 是否默认值
-    if (m_dsgConfig && m_dsgConfig->isInitializeSucceed() && !m_dsgConfig->rulesIsDefaultValue()) {
+    if (m_dsgConfig && m_dsgConfig->isInitializeSucceeded() && !m_dsgConfig->rulesIsDefaultValue()) {
         var = m_dsgConfig->rules();
-    } else if (m_fallbackConfig && m_dsgConfig->isInitializeSucceed() && !m_fallbackConfig->rulesIsDefaultValue()) {
+    } else if (m_fallbackConfig && m_fallbackConfig->isInitializeSucceeded() && !m_fallbackConfig->rulesIsDefaultValue()) {
         var = m_fallbackConfig->rules();
-    } else if (m_dsgConfig && m_dsgConfig->isInitializeSucceed()) {
+    } else if (m_dsgConfig && m_dsgConfig->isInitializeSucceeded()) {
         var = m_dsgConfig->rules();
     }
 
     if (var.isValid())
         QLoggingCategory::setFilterRules(var.toString().replace(";", "\n"));
 }
+
+bool DLogManagerPrivate::shouldSkipConsoleAppender() const
+{
+    if (qEnvironmentVariableIsSet("DTK_FORCE_CONSOLE_LOGGING"))
+        return false;
+
+
+    // Skip ConsoleAppender if running under systemd and stdout is connected to journal to avoid duplicate logging
+    QByteArray journalStream = qgetenv("JOURNAL_STREAM");
+    if (journalStream.isEmpty())
+        return false;
+
+    struct stat st;
+    if (fstat(STDOUT_FILENO, &st) != 0)
+        return false;
+
+    auto parts = journalStream.split(':');
+    if (parts.size() != 2)
+        return false;
+
+    bool ok1, ok2;
+    auto dev = parts[0].toULongLong(&ok1);
+    auto ino = parts[1].toULongLong(&ok2);
+
+    return ok1 && ok2 && st.st_dev == dev && st.st_ino == ino;
+}
+
 /*!
 @~english
   \class Dtk::Core::DLogManager
@@ -137,6 +171,13 @@ DLogManager::DLogManager()
 
 void DLogManager::initConsoleAppender(){
     Q_D(DLogManager);
+    
+    // Skip ConsoleAppender if JournalAppender is active under systemd to avoid duplicate logging
+    if (d->shouldSkipConsoleAppender() && d->m_journalAppender) {
+        qDebug() << "Running under systemd with JournalAppender enabled, skipping ConsoleAppender to avoid duplicate logging";
+        return;
+    }
+    
     d->m_consoleAppender = new ConsoleAppender;
     d->m_consoleAppender->setFormat(d->m_format);
     dlogger->registerAppender(d->m_consoleAppender);
@@ -157,6 +198,15 @@ void DLogManager::initJournalAppender()
     Q_D(DLogManager);
     d->m_journalAppender = new JournalAppender();
     dlogger->registerAppender(d->m_journalAppender);
+    
+    // Unregister ConsoleAppender if already registered under systemd to avoid duplicate logging
+    if (d->shouldSkipConsoleAppender() && d->m_consoleAppender) {
+        qDebug() << "Unregistered ConsoleAppender to avoid duplicate logging with JournalAppender under systemd";
+        dlogger->unregisterAppender(d->m_consoleAppender);
+        delete d->m_consoleAppender;
+        d->m_consoleAppender = nullptr;
+    }
+    
 #else
     qWarning() <<  "BUILD_WITH_SYSTEMD not defined or OS not support!!";
 #endif
@@ -213,7 +263,7 @@ QString DLogManager::getlogFilePath()
         if (!QDir(cachePath).exists()) {
             QDir(cachePath).mkpath(cachePath);
         }
-        instance()->d_func()->m_logPath = instance()->joinPath(cachePath, QString("%1.log").arg(qApp->applicationName()));
+        instance()->d_func()->m_logPath = instance()->joinPath(cachePath, QString("%1.log").arg(QCoreApplication::applicationName()));
     }
 
     return QDir::toNativeSeparators(DLogManager::instance()->d_func()->m_logPath);

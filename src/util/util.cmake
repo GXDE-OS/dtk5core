@@ -17,6 +17,7 @@ if(LINUX)
     ${CMAKE_CURRENT_LIST_DIR}/ddbusextendedabstractinterface.cpp
     ${CMAKE_CURRENT_LIST_DIR}/ddbusextendedpendingcallwatcher.cpp
     ${CMAKE_CURRENT_LIST_DIR}/dtextencoding.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/dutil.cpp
   )
 else()
   set(UTILS_SOURCES
@@ -37,6 +38,7 @@ else()
     ${CMAKE_CURRENT_LIST_DIR}/ddbusextendedabstractinterface.cpp
     ${CMAKE_CURRENT_LIST_DIR}/ddbusextendedpendingcallwatcher.cpp
     ${CMAKE_CURRENT_LIST_DIR}/dtextencoding.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/dutil.cpp
   )
 endif()
 file(GLOB UTILS_HEADERS
@@ -47,7 +49,7 @@ set(PRIVATE_HEADERS
     ${CMAKE_CURRENT_LIST_DIR}/ddbusinterface_p.h
     ${CMAKE_CURRENT_LIST_DIR}/ddbusextendedpendingcallwatcher_p.h)
 
-if(DTK_VERSION_MAJOR)
+if(NOT DTK5)
   list(REMOVE_ITEM UTILS_SOURCES "${CMAKE_CURRENT_LIST_DIR}/dtimedloop.cpp")
   list(REMOVE_ITEM UTILS_HEADERS "${PROJECT_SOURCE_DIR}/include/util/dtimedloop.h") # no longer be used
   list(REMOVE_ITEM UTILS_HEADERS "${PROJECT_SOURCE_DIR}/include/util/dasync.h")

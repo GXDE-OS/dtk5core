@@ -9,8 +9,10 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTORCC ON)
 # dbus
 set(CMAKE_CXX_FLAGS "-fno-access-control")
-add_compile_options(-fsanitize=address)
-add_link_options(-fsanitize=address)
+if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+    add_compile_options(-fsanitize=address)
+    add_link_options(-fsanitize=address)
+endif()
 
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Gui)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core)
@@ -20,6 +22,12 @@ if(LINUX)
     find_package(PkgConfig REQUIRED)
     if("${QT_VERSION_MAJOR}" STREQUAL "5")
         pkg_check_modules(QGSettings REQUIRED IMPORTED_TARGET gsettings-qt)
+    elseif(${QT_VERSION_MAJOR} EQUAL 6)
+        if(${Qt6Core_VERSION} VERSION_GREATER_EQUAL 6.10.0)
+            find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS CorePrivate)
+        endif()
+    else()
+        message(FATAL_ERROR "Unsupported Qt version: ${QT_VERSION_MAJOR}")
     endif()
 endif()
 
@@ -28,8 +36,10 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Concurrent)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Test)
 find_package(GTest REQUIRED)
 
+include(GoogleTest)
+
 # for test.so
-set(TEST_SO_NAME vtabletest${DTK_VERSION_MAJOR})
+set(TEST_SO_NAME vtabletest${DTK_NAME_SUFFIX})
 add_subdirectory(./testso)
 
 # test
@@ -41,7 +51,7 @@ file(GLOB FackDBus
     "./fakedbus/*.cpp"
 )
 
-if(DTK_VERSION_MAJOR)
+if(NOT DTK5)
     list(REMOVE_ITEM TEST_SOURCE "${CMAKE_CURRENT_LIST_DIR}/ut_gsettingsbackend.cpp")
     list(REMOVE_ITEM TEST_SOURCE "${CMAKE_CURRENT_LIST_DIR}/ut_dasync.cpp")
 endif()
@@ -107,7 +117,13 @@ target_include_directories( ${BIN_NAME} PUBLIC
     ../include/settings/
     ../include/filesystem/
     ../include/
+    ../src/log/
     ./testso/
 )
 
-add_test(NAME ${BIN_NAME} COMMAND ${BIN_NAME})
+# Set RPATH to find libvtabletest*.so in the build directory
+set_target_properties(${BIN_NAME} PROPERTIES
+    SKIP_BUILD_RPATH FALSE
+)
+
+gtest_discover_tests(${BIN_NAME})

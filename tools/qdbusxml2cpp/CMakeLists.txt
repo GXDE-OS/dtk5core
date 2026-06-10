@@ -1,9 +1,15 @@
 set(TARGET_NAME qdbusxml2cpp-fix)
-set(BIN_NAME ${TARGET_NAME}${DTK_VERSION_MAJOR})
+set(BIN_NAME ${TARGET_NAME}${DTK_NAME_SUFFIX})
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS DBus)
+
+if(${QT_VERSION_MAJOR} EQUAL 6)
+    if (${Qt6DBus_VERSION} VERSION_GREATER_EQUAL 6.10.0)
+      find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS DBusPrivate)
+    endif()
+endif()
 
 add_executable(${BIN_NAME}
   qdbusxml2cpp.cpp
@@ -24,13 +30,13 @@ set_target_properties(
 
 install(
   TARGETS ${BIN_NAME}
-  EXPORT Dtk${DTK_VERSION_MAJOR}ToolsTargets
+  EXPORT Dtk${DTK_NAME_SUFFIX}ToolsTargets
   DESTINATION ${TOOL_INSTALL_DIR}
 )
 
 install(
-  EXPORT Dtk${DTK_VERSION_MAJOR}ToolsTargets
-  FILE Dtk${DTK_VERSION_MAJOR}ToolsTargets.cmake
-  NAMESPACE Dtk${DTK_VERSION_MAJOR}::
-  DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/Dtk${DTK_VERSION_MAJOR}Tools"
+  EXPORT Dtk${DTK_NAME_SUFFIX}ToolsTargets
+  FILE Dtk${DTK_NAME_SUFFIX}ToolsTargets.cmake
+  NAMESPACE Dtk${DTK_NAME_SUFFIX}::
+  DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/Dtk${DTK_NAME_SUFFIX}Tools"
 )

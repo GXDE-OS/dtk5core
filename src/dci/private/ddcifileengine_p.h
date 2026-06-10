@@ -37,13 +37,17 @@ class DDciFileEngineIterator : public QAbstractFileEngineIterator
 {
     friend class DDciFileEngine;
 public:
+#if QT_VERSION < QT_VERSION_CHECK(6, 8, 0)
     DDciFileEngineIterator(QDir::Filters filters, const QStringList &nameFilters);
+#else
+    DDciFileEngineIterator(const QString &path, QDir::Filters filters, const QStringList &nameFilters);
+    DDciFileEngineIterator(const QString &path, QDirListing::IteratorFlags filters, const QStringList &nameFilters);
+#endif
 
 #if QT_VERSION < QT_VERSION_CHECK(6, 8, 0)
     QString next() override;
     bool hasNext() const override;
 #else
-    DDciFileEngineIterator(QDirListing::IteratorFlags filters, const QStringList &nameFilters);
     bool advance() override;
 #endif
 
@@ -54,6 +58,9 @@ private:
     mutable QStringList list;
     mutable int nextValid = -1;
     int current = -1;
+#if QT_VERSION >= QT_VERSION_CHECK(6, 8, 0)
+    std::optional<QDirListing::IteratorFlags> m_listingFilters {std::nullopt};
+#endif
 };
 
 class DDciFileEngine : public QAbstractFileEngine
@@ -111,10 +118,11 @@ public:
 #endif
 
     typedef DDciFileEngineIterator Iterator;
-#if QT_VERSION >= QT_VERSION_CHECK(6, 8, 1)
+#if QT_VERSION >= QT_VERSION_CHECK(6, 9, 0)
     IteratorUniquePtr beginEntryList(const QString &path, QDirListing::IteratorFlags filters, const QStringList &filterNames) override;
     IteratorUniquePtr endEntryList() override;
 #elif QT_VERSION >= QT_VERSION_CHECK(6, 8, 0)
+    IteratorUniquePtr beginEntryList(const QString &path, QDirListing::IteratorFlags filters, const QStringList &filterNames) override;
     IteratorUniquePtr beginEntryList(const QString &path, QDir::Filters filters, const QStringList &filterNames) override;
     IteratorUniquePtr endEntryList() override;
 #else
@@ -129,7 +137,11 @@ public:
                    ExtensionReturn *output = 0) override;
     bool supportsExtension(Extension extension) const override;
 
+#if QT_VERSION >= QT_VERSION_CHECK(6, 10, 0)
+    TriStateResult cloneTo(QAbstractFileEngine *target) override;
+#else
     bool cloneTo(QAbstractFileEngine *target) override;
+#endif
 
 private:
     bool forceSave(bool writeFile = false) const;
