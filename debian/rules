@@ -24,8 +24,7 @@ endif
 endif
 
 BUILD_DOCS := $(if $(filter nodoc,$(DEB_BUILD_PROFILES)),OFF,ON)
-BUILD_DTK5 := $(if $(filter nodtk5,$(DEB_BUILD_PROFILES)),OFF,ON)
-BUILD_DTK6 := $(if $(filter nodtk6,$(DEB_BUILD_PROFILES)),OFF,ON)
+BUILD_DTK5 := ON
 
 %:
 	dh $@
