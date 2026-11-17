@@ -1,19 +1,20 @@
 # Maintainer: justforlxz <justforlxz@gmail.com>
-pkgname=dtkcore-git
+pkgname=gxde-dtkcore
 pkgver=6.7.43
 pkgrel=1
 pkgdesc='DTK core modules'
 arch=('x86_64' 'aarch64')
 url="https://github.com/GXDE-OS/dtk5core"
 license=('LGPL-3.0-or-later' 'LGPL-2.1-or-later' 'BSD-3-Clause')
-# 官方源的 dtkcommon/dtklog 版本不同，必须依赖 GXDE 的 -git 包
-# Official repos ship different dtkcommon/dtklog, depend on the GXDE -git packages explicitly.
+# 官方源的 dtkcommon/dtklog 版本不同，必须依赖带 gxde- 前缀的 GXDE 包
+# Official repos ship different dtkcommon/dtklog, depend on the gxde- prefixed GXDE packages explicitly.
 # icu/uchardet 由 QLibrary 在运行时加载，lshw 被 DSysInfo 调用
 # icu/uchardet are loaded at runtime via QLibrary, lshw is invoked by DSysInfo.
-depends=('dtkcommon-git' 'dtklog-git' 'qt5-base' 'gsettings-qt5' 'icu' 'uchardet' 'dbus' 'lshw')
+depends=('gxde-dtkcommon' 'gxde-dtklog' 'qt5-base' 'gsettings-qt5' 'icu' 'uchardet' 'dbus' 'lshw')
 makedepends=('git' 'cmake' 'ninja' 'qt5-tools')
-provides=("dtkcore=$pkgver")
-conflicts=('dtkcore')
+provides=("dtkcore=$pkgver" "dtkcore-git=$pkgver")
+conflicts=('dtkcore' 'dtkcore-git')
+replaces=('dtkcore-git')
 groups=('deepin-git')
 source=()
 sha512sums=()
